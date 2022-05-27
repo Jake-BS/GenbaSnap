@@ -1,1 +1,0 @@
-﻿Solution to the "Snap Game" task set for the Software Developer Application
