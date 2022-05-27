@@ -8,6 +8,7 @@ namespace GenbaSnap.Models
 {
     public class Card
     {
+        public string Name { get; set; }
         public string Rank { get; set; }
         public string Suit { get; set; }
 
@@ -15,6 +16,7 @@ namespace GenbaSnap.Models
         {
             Rank = rank;
             Suit = suit;
+            Name = rank + " of " + suit;
         }
     }
 }

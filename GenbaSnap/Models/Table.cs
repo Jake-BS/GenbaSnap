@@ -16,13 +16,13 @@ namespace GenbaSnap.Models
         {
             NumberOfPlayers = nOfPlayers;
             Deck = CreateDeck();
-            PlayerList = SeatPlayers();
+            PlayerList = DealPlayers();
         }
 
-        private List<Card> CreateDeck()
+        public List<Card> CreateDeck()
         {
             var deck = new List<Card>();
-            var ranks = new List<string>() {"ace", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "jack", "queen", "king"};
+            var ranks = new List<string>() {"ace", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "jack", "queen", "king"};
             var suits = new List<string>() { "clubs", "diamonds", "hearts", "spades" };
             foreach (var rank in ranks)
             {
@@ -31,7 +31,7 @@ namespace GenbaSnap.Models
             return deck;
         }
 
-        private List<Player> SeatPlayers()
+        private List<Player> DealPlayers()
         {
             List<Player> playerList = new List<Player>();
             for (int i = 0; i < NumberOfPlayers; i++)
@@ -39,12 +39,15 @@ namespace GenbaSnap.Models
                 var curPlayer = new Player(i.ToString());
                 playerList.Add(curPlayer);
             }
+            //randomizes the order of the cards in the Deck property
             Shuffle();
-            //current player for dealing
+            //CDFD -> current player for dealing
             var CPFD = 0;
             foreach (var card in Deck)
             {
                 playerList[CPFD].Pile.Add(card);
+                CPFD++;
+                if (CPFD >= NumberOfPlayers) CPFD = 0;
             }
             return playerList;
         }
