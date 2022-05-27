@@ -52,11 +52,24 @@ namespace GenbaSnap.Models
             return playerList;
         }
 
-        private void Shuffle()
+        public void Shuffle()
         {
             //From https://www.delftstack.com/howto/csharp/shuffle-a-list-in-csharp/
             var rnd = new Random();
             var randomized = Deck.OrderBy(item => rnd.Next());
+            Deck = new List<Card>();
+            foreach (var card in randomized) Deck.Add(card);
+        }
+
+        public void StartRound()
+        {
+            Console.WriteLine("Press Enter to continue...");
+            Console.ReadLine();
+            List<Card> curRoundCards = new List<Card>();
+            foreach (var player in PlayerList)
+            {
+                
+            }
         }
     }
 }
