@@ -79,14 +79,14 @@ namespace GenbaSnap.Models
             while (!gameOver)
             {
                 var player = PlayerList[curPlayerIndex];
-                var revealedCard = player.Pile[-1];
+                var revealedCard = player.Pile[player.Pile.Count-1];
                 Console.WriteLine("Player " + player.Name + "'s card is: " + revealedCard.Name + ".");
                 player.FaceUpPile.Add(revealedCard);
-                player.Pile.RemoveAt(-1);
+                player.Pile.RemoveAt(player.Pile.Count - 1);
                 curFaceUpCards[int.Parse(player.Name)] = revealedCard;
                 Console.WriteLine("Press your key if you see a pair!");
                 var snapInput = Console.ReadLine();
-                if (snapInput != null || snapInput != "")
+                if (snapInput != "")
                 {
                     Card? winningCard = null;
                     foreach (var card in curFaceUpCards)
@@ -108,6 +108,7 @@ namespace GenbaSnap.Models
                     {
                         string winnerInput = snapInput.Substring(0);
                         int winnerIndex = KeyboardPlayerDict[winnerInput];
+                        Console.WriteLine("Player " + PlayerList[winnerIndex].Name + " wins the " + winningCard.Rank + " piles!");
                         List<int> pairCardHolderIndexes = new List<int>();
                         foreach (var card in curFaceUpCards)
                         {
@@ -128,7 +129,7 @@ namespace GenbaSnap.Models
                 }
                 
                 curPlayerIndex++;
-                if (curPlayerIndex > PlayerList.Count) curPlayerIndex = 0;
+                if (curPlayerIndex >= PlayerList.Count) curPlayerIndex = 0;
                 if (winner == null) 
                 {
                     Console.WriteLine("Press enter to reveal next Card...");
