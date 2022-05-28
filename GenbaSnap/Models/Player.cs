@@ -10,11 +10,13 @@ namespace GenbaSnap.Models
     {
         public string Name { get; set; }
         public List<Card> Pile {get; set;}
+        public List<Card> FaceUpPile {get; set;}
 
         public Player(string name)
         {
             Name = name;
             Pile = new List<Card>();
+            FaceUpPile = new List<Card>();
         }
     }
 }

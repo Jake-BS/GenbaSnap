@@ -24,3 +24,4 @@ while (stringNOfPlayers == null || stringNOfPlayers == "")
 Console.WriteLine("You have chosen to play with " + stringNOfPlayers + " players");
 int nOfPlayers = int.Parse(stringNOfPlayers);
 var table = new Table(nOfPlayers);
+table.Start();

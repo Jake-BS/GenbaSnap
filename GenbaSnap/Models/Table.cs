@@ -9,12 +9,19 @@ namespace GenbaSnap.Models
     public class Table
     {
         public int NumberOfPlayers { get; set; }
+        public Dictionary<string, int> KeyboardPlayerDict { get; set; }
         public List<Player> PlayerList { get; set; }
         public List<Card> Deck { get; set; }
 
         public Table(int nOfPlayers)
         {
             NumberOfPlayers = nOfPlayers;
+            KeyboardPlayerDict = new Dictionary<string, int>() {
+                { "q", 0},
+                { "p", 1},
+                { "z", 2},
+                { "m", 3 }
+            };
             Deck = CreateDeck();
             PlayerList = DealPlayers();
         }
@@ -61,15 +68,74 @@ namespace GenbaSnap.Models
             foreach (var card in randomized) Deck.Add(card);
         }
 
-        public void StartRound()
+        public void Start()
         {
             Console.WriteLine("Press Enter to continue...");
             Console.ReadLine();
-            List<Card> curRoundCards = new List<Card>();
-            foreach (var player in PlayerList)
+            Card[] curFaceUpCards = new Card[PlayerList.Count];
+            var curPlayerIndex = 0;
+            var gameOver = false;
+            string? winner = null;
+            while (!gameOver)
             {
+                var player = PlayerList[curPlayerIndex];
+                var revealedCard = player.Pile[-1];
+                Console.WriteLine("Player " + player.Name + "'s card is: " + revealedCard.Name + ".");
+                player.FaceUpPile.Add(revealedCard);
+                player.Pile.RemoveAt(-1);
+                curFaceUpCards[int.Parse(player.Name)] = revealedCard;
+                Console.WriteLine("Press your key if you see a pair!");
+                var snapInput = Console.ReadLine();
+                if (snapInput != null || snapInput != "")
+                {
+                    Card? winningCard = null;
+                    foreach (var card in curFaceUpCards)
+                    {
+                        int cardCounter = 0;
+                        foreach (var card2 in curFaceUpCards)
+                        {
+                            if (card.Rank == card2.Rank)
+                            {
+                                cardCounter++;
+                                if (cardCounter > 1)
+                                {
+                                    winningCard = card2;
+                                }
+                            } 
+                        }
+                    }
+                    if (winningCard != null)
+                    {
+                        string winnerInput = snapInput.Substring(0);
+                        int winnerIndex = KeyboardPlayerDict[winnerInput];
+                        List<int> pairCardHolderIndexes = new List<int>();
+                        foreach (var card in curFaceUpCards)
+                        {
+                            if (card.Rank == winningCard.Rank) pairCardHolderIndexes.Add(Array.IndexOf(curFaceUpCards, card));
+                        }
+                        //Winner takes pair holders' face up cards
+                        foreach (int pairIndex in pairCardHolderIndexes)
+                        {
+                            PlayerList[winnerIndex].Pile = (List<Card>)PlayerList[pairIndex].FaceUpPile.Concat(PlayerList[winnerIndex].Pile);
+                            PlayerList[pairIndex].FaceUpPile = new List<Card>();
+                        }
+                        if (PlayerList[winnerIndex].Pile.Count == 52)
+                        {
+                            gameOver = true;
+                            winner = PlayerList[winnerIndex].Name;
+                        }
+                    }
+                }
                 
+                curPlayerIndex++;
+                if (curPlayerIndex > PlayerList.Count) curPlayerIndex = 0;
+                if (winner == null) 
+                {
+                    Console.WriteLine("Press enter to reveal next Card...");
+                    Console.ReadLine();
+                }
             }
+            Console.WriteLine("The winner is " + winner + "!");
         }
     }
 }
