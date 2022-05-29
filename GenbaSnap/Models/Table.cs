@@ -70,73 +70,121 @@ namespace GenbaSnap.Models
 
         public void Start()
         {
+            Console.WriteLine("Each time a card is revealed you will be given an opportunity to hit your key if your see a pair.");
+            Console.WriteLine("Player 0's key is Q, Player 1's key is P, Player 2's key is Z, and Player 3's key is M.");
+            Console.WriteLine("Press Enter after everyone has pressed their key, and the quickest will win the cards from the pairs' piles.");
             Console.WriteLine("Press Enter to continue...");
             Console.ReadLine();
-            Card[] curFaceUpCards = new Card[PlayerList.Count];
+            var curFaceUpCards = new List<Card>();
+            for (int i = 0; i < PlayerList.Count; i++)
+            {
+                curFaceUpCards.Add(new Card("None", "None"));
+            }
             var curPlayerIndex = 0;
             var gameOver = false;
-            string? winner = null;
+            List<string>? winners = null;
+            int outOfCardsCounter = 0;
             while (!gameOver)
             {
                 var player = PlayerList[curPlayerIndex];
-                var revealedCard = player.Pile[player.Pile.Count-1];
-                Console.WriteLine("Player " + player.Name + "'s card is: " + revealedCard.Name + ".");
-                player.FaceUpPile.Add(revealedCard);
-                player.Pile.RemoveAt(player.Pile.Count - 1);
-                curFaceUpCards[int.Parse(player.Name)] = revealedCard;
-                Console.WriteLine("Press your key if you see a pair!");
-                var snapInput = Console.ReadLine();
-                if (snapInput != "")
+                if (player.Pile.Count > 0)
                 {
-                    Card? winningCard = null;
-                    foreach (var card in curFaceUpCards)
+                    var revealedCard = player.Pile[player.Pile.Count - 1];
+                    Console.WriteLine("Player " + player.Name + "'s card is: " + revealedCard.Name + ".");
+                    player.FaceUpPile.Add(revealedCard);
+                    player.Pile.RemoveAt(player.Pile.Count - 1);
+                    curFaceUpCards[int.Parse(player.Name)] = revealedCard;
+                    Console.WriteLine("Press your key if you see a pair!");
+                    var snapInput = Console.ReadLine();
+                    if (snapInput != "")
                     {
-                        int cardCounter = 0;
-                        foreach (var card2 in curFaceUpCards)
-                        {
-                            if (card.Rank == card2.Rank)
-                            {
-                                cardCounter++;
-                                if (cardCounter > 1)
-                                {
-                                    winningCard = card2;
-                                }
-                            } 
-                        }
-                    }
-                    if (winningCard != null)
-                    {
-                        string winnerInput = snapInput.Substring(0);
-                        int winnerIndex = KeyboardPlayerDict[winnerInput];
-                        Console.WriteLine("Player " + PlayerList[winnerIndex].Name + " wins the " + winningCard.Rank + " piles!");
-                        List<int> pairCardHolderIndexes = new List<int>();
+                        Card? winningCard = null;
                         foreach (var card in curFaceUpCards)
                         {
-                            if (card.Rank == winningCard.Rank) pairCardHolderIndexes.Add(Array.IndexOf(curFaceUpCards, card));
+                            int cardCounter = 0;
+                            foreach (var card2 in curFaceUpCards)
+                            {
+                                if (card.Rank == card2.Rank)
+                                {
+                                    cardCounter++;
+                                    if (cardCounter > 1)
+                                    {
+                                        winningCard = card2;
+                                    }
+                                }
+                            }
                         }
-                        //Winner takes pair holders' face up cards
-                        foreach (int pairIndex in pairCardHolderIndexes)
+                        if (winningCard != null && winningCard.Rank != "None")
                         {
-                            PlayerList[winnerIndex].Pile = (List<Card>)PlayerList[pairIndex].FaceUpPile.Concat(PlayerList[winnerIndex].Pile);
-                            PlayerList[pairIndex].FaceUpPile = new List<Card>();
-                        }
-                        if (PlayerList[winnerIndex].Pile.Count == 52)
-                        {
-                            gameOver = true;
-                            winner = PlayerList[winnerIndex].Name;
+                            string winnerInput = snapInput.Substring(0, 1);
+                            int winnerIndex = KeyboardPlayerDict[winnerInput];
+                            Console.WriteLine("Player " + PlayerList[winnerIndex].Name + " wins the piles with " + winningCard.Rank + " on top!");
+                            List<int> pairCardHolderIndexes = new List<int>();
+                            int tempIndex = 0;
+                            foreach (var card in curFaceUpCards)
+                            {
+                                if (card.Rank == winningCard.Rank) pairCardHolderIndexes.Add(tempIndex);
+                                tempIndex++;
+                            }
+                            //Winner takes pair holders' face up cards
+                            foreach (int pairIndex in pairCardHolderIndexes)
+                            {
+                                var totalPile = PlayerList[pairIndex].FaceUpPile;
+                                totalPile.AddRange(PlayerList[winnerIndex].Pile);
+                                PlayerList[winnerIndex].Pile = totalPile;
+                                PlayerList[pairIndex].FaceUpPile = new List<Card>();
+                            }
+                            if (PlayerList[winnerIndex].Pile.Count == 52)
+                            {
+                                gameOver = true;
+                                winners.Add(PlayerList[winnerIndex].Name);
+                            }
                         }
                     }
                 }
+                else
+                {
+                    Console.WriteLine("Player " + player.Name + " is out of face down cards");
+                    outOfCardsCounter++;
+                    if (outOfCardsCounter == PlayerList.Count)
+                    {
+                        Console.WriteLine("All players are out of face down cards");
+                        int highestCardCount = 0;
+                        winners = new List<string>();
+                        foreach (var tempPlayer in PlayerList)
+                        {
+                            if (tempPlayer.FaceUpPile.Count > highestCardCount)
+                            {
+                                highestCardCount = tempPlayer.FaceUpPile.Count;
+                                winners = new List<string>();
+                                winners.Add(tempPlayer.Name);
+                            } else if (tempPlayer.FaceUpPile.Count == winners.Count) 
+                                winners.Add(tempPlayer.Name);
+                        }
+                        gameOver = true;
+
+                    }
+                }
+                
                 
                 curPlayerIndex++;
                 if (curPlayerIndex >= PlayerList.Count) curPlayerIndex = 0;
-                if (winner == null) 
+                if (winners == null) 
                 {
                     Console.WriteLine("Press enter to reveal next Card...");
                     Console.ReadLine();
                 }
             }
-            Console.WriteLine("The winner is " + winner + "!");
+            if (winners.Count == 1) Console.WriteLine("The winner is " + winners[0] + "!");
+            else
+            {
+                Console.Write("The winners are ");
+                foreach (var winner in winners)
+                {
+                    if (int.Parse(winner) != winners.Count - 1) Console.Write(winner + ", ");
+                    else Console.WriteLine("and " + winner + "!");
+                }
+            }
         }
     }
 }

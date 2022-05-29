@@ -2,8 +2,9 @@
 
 Console.WriteLine("Hello, please enter the number of players");
 string? stringNOfPlayers = null;
-string prompt = "Please enter the number of players:";
-while (stringNOfPlayers == null || stringNOfPlayers == "")
+string prompt = "Please enter a number of players (from 2 up to 4):";
+int nOfPlayers = 0;
+while ((stringNOfPlayers == null || stringNOfPlayers == "") || nOfPlayers < 2 || nOfPlayers > 4)
 {
     stringNOfPlayers = Console.ReadLine();
     if (stringNOfPlayers == null || stringNOfPlayers == "") Console.WriteLine(prompt);
@@ -11,7 +12,7 @@ while (stringNOfPlayers == null || stringNOfPlayers == "")
     {
         try
         {
-            int.Parse(stringNOfPlayers);
+            nOfPlayers = int.Parse(stringNOfPlayers);
         }
         catch
         {
@@ -22,6 +23,5 @@ while (stringNOfPlayers == null || stringNOfPlayers == "")
     }
 }
 Console.WriteLine("You have chosen to play with " + stringNOfPlayers + " players");
-int nOfPlayers = int.Parse(stringNOfPlayers);
 var table = new Table(nOfPlayers);
 table.Start();
