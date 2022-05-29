@@ -96,6 +96,20 @@ namespace GenbaSnap.Models
                     curFaceUpCards[int.Parse(player.Name)] = revealedCard;
                     Console.WriteLine("Press your key if you see a pair!");
                     var snapInput = Console.ReadLine();
+                    bool legitInput = false;
+                    foreach (var letter in snapInput)
+                    {
+                        if (KeyboardPlayerDict.ContainsKey(letter.ToString()))
+                        {
+                            if (KeyboardPlayerDict[letter.ToString()] < PlayerList.Count)
+                            {
+                                legitInput = true;
+                                snapInput = letter.ToString();
+                                break;
+                            }
+                        }
+                    }
+                    if (!legitInput) snapInput = "";
                     if (snapInput != "")
                     {
                         Card? winningCard = null;
@@ -116,8 +130,7 @@ namespace GenbaSnap.Models
                         }
                         if (winningCard != null && winningCard.Rank != "None")
                         {
-                            string winnerInput = snapInput.Substring(0, 1);
-                            int winnerIndex = KeyboardPlayerDict[winnerInput];
+                            int winnerIndex = KeyboardPlayerDict[snapInput];
                             Console.WriteLine("Player " + PlayerList[winnerIndex].Name + " wins the piles with " + winningCard.Rank + " on top!");
                             List<int> pairCardHolderIndexes = new List<int>();
                             int tempIndex = 0;
