@@ -2,6 +2,7 @@ using Autofac.Extras.Moq;
 using GenbaSnap.Models;
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 
 namespace GenbaSnap.Tests
 {
@@ -57,7 +58,7 @@ namespace GenbaSnap.Tests
         //Valid input but with accidental keystrokes
         [TestCase("fesfsfesfsm", 4, "m")]
         [TestCase("mp", 2, "p")]
-        //Non valid inputs
+        //Invalid inputs
         [TestCase("fhufihwh", 2, "")]
         [TestCase("/[].'#.", 2, "")]
         //Valid inputs but for incorrect number of players
@@ -74,6 +75,83 @@ namespace GenbaSnap.Tests
         {
             var testTable = new Table(2);
             Assert.Pass();
+        }
+
+        [Test]
+        public void OutroTextTest()
+        {
+            Table testTable = new Table(2);
+            var winners = new List<string>() { "0", "1" };
+            var predOutro = "The winners are Players 0, and 1!";
+            testTable.Winners = winners;
+            Assert.AreEqual(predOutro, testTable.OutroText());
+
+            testTable = new Table(2);
+            winners = new List<string>() { "1" };
+            predOutro = "The winner is Player 1!";
+            testTable.Winners = winners;
+            Assert.AreEqual(predOutro, testTable.OutroText());
+        }
+
+        [Test]
+        public void FindWinnerTest()
+        {
+            //2 players, player 0 has more cards, so should be the only winner
+            Table testTable = new Table(2);
+            Card genericCard = new Card("Generic", "Generic");
+            testTable.PlayerList[0].FaceUpPile = new List<Card>() { genericCard, genericCard };
+            testTable.PlayerList[1].FaceUpPile = new List<Card>() { genericCard };
+            var predWinners = new List<string>() { "0"};
+            testTable.GameDoneFindWinner();
+            Assert.AreEqual(predWinners, testTable.Winners);
+
+            //3 players, player 0 and player 1 have more cards than player 2, so 0 and 1 win.
+            testTable = new Table(3);
+            genericCard = new Card("Generic", "Generic");
+            testTable.PlayerList[0].FaceUpPile = new List<Card>() { genericCard, genericCard };
+            testTable.PlayerList[1].FaceUpPile = new List<Card>() { genericCard, genericCard };
+            testTable.PlayerList[2].FaceUpPile = new List<Card>() { genericCard };
+            predWinners = new List<string>() { "0", "1" };
+            testTable.GameDoneFindWinner();
+            Assert.AreEqual(predWinners, testTable.Winners);
+
+            //4 player, all 4 have an equal amount of cards so they all win/draw
+            testTable = new Table(4);
+            genericCard = new Card("Generic", "Generic");
+            testTable.PlayerList[0].FaceUpPile = new List<Card>() { genericCard, genericCard };
+            testTable.PlayerList[1].FaceUpPile = new List<Card>() { genericCard, genericCard };
+            testTable.PlayerList[2].FaceUpPile = new List<Card>() { genericCard, genericCard };
+            testTable.PlayerList[3].FaceUpPile = new List<Card>() { genericCard, genericCard };
+            predWinners = new List<string>() { "0", "1", "2", "3" };
+            testTable.GameDoneFindWinner();
+            Assert.AreEqual(predWinners, testTable.Winners);
+        }
+
+        [Test]
+        public void SuccessfulSnapTest()
+        {
+            //Tests if winning a snap will add the two cards to player 0's pile
+            //Player 0's pile is set to 50, after the victory of 2 cards player 0 should win the game
+            var testTable = new Table(4);
+            Card genericCard = new Card("Generic", "Generic");
+            Card snapCard = new Card("Snap", "Snap");
+            var curFaceUpCards = new List<Card>();
+            testTable.PlayerList[0].Pile = new List<Card>();
+            for (int i = 0; i < 50; i++) testTable.PlayerList[0].Pile.Add(genericCard);
+            for (int i = 0; i < 2; i++)
+            {
+                curFaceUpCards.Add(genericCard);
+                testTable.PlayerList[i].FaceUpPile.Add(genericCard);
+            }
+            for (int i = 0; i < 2; i++) 
+            {
+                curFaceUpCards.Add(snapCard);
+                testTable.PlayerList[i+2].FaceUpPile.Add(snapCard);
+            }
+            
+            var gameOver = false;
+            var snapInput = "q";
+            Assert.AreEqual(true, testTable.SuccessfulSnap(false, snapInput, snapCard, curFaceUpCards));
         }
     }
 }
