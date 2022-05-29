@@ -1,8 +1,8 @@
 ﻿using GenbaSnap.Models;
 
-Console.WriteLine("Hello, please enter the number of players");
 string? stringNOfPlayers = null;
 string prompt = "Please enter a number of players (from 2 up to 4):";
+Console.WriteLine(prompt);
 int nOfPlayers = 0;
 while ((stringNOfPlayers == null || stringNOfPlayers == "") || nOfPlayers < 2 || nOfPlayers > 4)
 {

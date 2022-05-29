@@ -10,7 +10,6 @@ namespace GenbaSnap.Tests
         [SetUp]
         public void Setup()
         {
-
         }
 
         [Test]
@@ -48,6 +47,33 @@ namespace GenbaSnap.Tests
             //There is a very very small chance of this failing when the function is working
             //As technically the random shuffling could end up with an ordered deck, run again if test fails.
             Assert.AreNotEqual(testDeck, testTable.Deck);
+        }
+
+        //Valid inputs
+        [TestCase("q", 2, "q")]
+        [TestCase("p", 2, "p")]
+        [TestCase("z", 3, "z")]
+        [TestCase("m", 4, "m")]
+        //Valid input but with accidental keystrokes
+        [TestCase("fesfsfesfsm", 4, "m")]
+        [TestCase("mp", 2, "p")]
+        //Non valid inputs
+        [TestCase("fhufihwh", 2, "")]
+        [TestCase("/[].'#.", 2, "")]
+        //Valid inputs but for incorrect number of players
+        [TestCase("m", 2, "")]
+        [TestCase("z", 2, "")]
+        public void ValidateInputTest(string snapInput, int nOfPlayers, string predOutput)
+        {
+            var testTable = new Table(nOfPlayers);
+            Assert.AreEqual(predOutput, testTable.ValidateInput(snapInput));
+        }
+
+        [Test]
+        public void IntroTextTest()
+        {
+            var testTable = new Table(2);
+            Assert.Pass();
         }
     }
 }
