@@ -80,7 +80,6 @@ namespace GenbaSnap.Models
             }
             var curPlayerIndex = 0;
             var gameOver = false;
-            int outOfCardsCounter = 0;
             while (!gameOver)
             {
                 var player = PlayerList[curPlayerIndex];
@@ -91,7 +90,8 @@ namespace GenbaSnap.Models
                 else
                 {
                     Console.WriteLine("Player " + player.Name + " is out of face down cards");
-                    outOfCardsCounter++;
+                    int outOfCardsCounter = 0;
+                    foreach (var playerToTestEmpty in PlayerList) if(playerToTestEmpty.Pile.Count == 0) outOfCardsCounter++;
                     if (outOfCardsCounter == PlayerList.Count)
                     {
                         GameDoneFindWinner();
@@ -215,8 +215,10 @@ namespace GenbaSnap.Models
         private void IntroText()
         {
             Console.WriteLine("Each time a card is revealed you will be given an opportunity to hit your key if your see a pair.");
+            Console.WriteLine();
             Console.WriteLine("Player 0's key is Q, Player 1's key is P, Player 2's key is Z, and Player 3's key is M.");
             Console.WriteLine("Press Enter after everyone has pressed their key, and the quickest will win the cards from the pairs' piles.");
+            Console.WriteLine();
             Console.WriteLine("Press Enter to continue...");
             Console.ReadLine();
         }
@@ -224,7 +226,8 @@ namespace GenbaSnap.Models
         public string ValidateInput(string snapInput)
         {
             bool legitInput = false;
-            foreach (var letter in snapInput)
+            //Stops caps lock from breaking inputs
+            foreach (var letter in snapInput.ToLower())
             {
                 if (KeyboardPlayerDict.ContainsKey(letter.ToString()))
                 {
